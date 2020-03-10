@@ -1,0 +1,26 @@
+---
+resources:
+  - name: every-1m
+    type: time
+    source: { interval: 1m }
+
+jobs:
+  - name: Departing Flights Monitor
+    plan:
+      - get: every-1m
+        trigger: true
+      - task: departing-flights-monitor
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source: { repository: ubuntu }
+          run:
+            path: bash
+            args:
+              - -ec
+              - |
+                echo $(((RANDOM%12)+12)):$(((RANDOM%50)+10)) "Moscow VKO from Berlin Tegel	UT 706 C63-C65	C85	Boarding"
+                echo $(((RANDOM%12)+12)):$(((RANDOM%50)+10)) "Rome FCO from Berlin Tegel	AZ 423 C49-C51	C60	End of Check-in"
+                echo $(((RANDOM%12)+12)):$(((RANDOM%50)+10)) "Lisbon from Berlin Tegel	TP 537 A06	A06	Check-in"
+                echo $(((RANDOM%12)+12)):$(((RANDOM%50)+10)) "Paris CDG from Berlin Tegel	AF 1735 A05A05	A05	Check-in"
