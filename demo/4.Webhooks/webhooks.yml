@@ -1,0 +1,74 @@
+---
+resource_types:
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: teliaoss/github-pr-resource
+
+resources:
+  - name: concourse-workshop
+    type: git
+    source:
+      uri: https://((github_token))@github.com/((github_user))/concourse-workshop.git
+      branch: ((github_branch))
+
+  - name: pull-request
+    type: pull-request
+    check_every: 24h
+    webhook_token: vDGfjshLs2h
+    source:
+      repository: ((github_user))/concourse-workshop
+      access_token: ((github_token))
+
+jobs:
+  - name: Linting
+    plan:
+      - get: concourse-workshop
+        trigger: true
+
+      - task: linting
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: ubuntu
+          run:
+            path: ./demo/scripts/linting.sh
+            dir: concourse-workshop
+          inputs:
+            - name: concourse-workshop
+
+  - name: Code Style
+    plan:
+      - get: concourse-workshop
+        trigger: true
+
+      - task: check-code-style
+        file: concourse-workshop/demo/tasks/code-style.yml
+
+  - name: Tests
+    plan:
+      - get: concourse-workshop
+        trigger: true
+        passed: ["Linting", "Code Style"]
+
+      - task: get-depedencies
+        file: concourse-workshop/demo/tasks/deps.yml
+
+      - in_parallel:
+          - task: unit-tests
+            file: concourse-workshop/demo/tasks/unit-tests.yml
+
+          - task: integration-tests
+            file: concourse-workshop/demo/tasks/integration-tests.yml
+
+  - name: Pull Request Test
+    plan:
+      - get: pull-request
+        trigger: true
+
+      - task: check-code-style
+        file: pull-request/demo/tasks/pr-test.yml
+        input_mapping:
+          source-code: pull-request
