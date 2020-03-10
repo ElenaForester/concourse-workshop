@@ -1,0 +1,11 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: ubuntu
+run:
+  path: ./demo/scripts/pr-test.sh
+  dir: source-code
+inputs:
+  - name: source-code
