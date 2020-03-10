@@ -15,7 +15,7 @@ resources:
   - name: pull-request
     type: pull-request
     check_every: 24h
-    webhook_token: vDGfjshLs2h
+    webhook_token: "vDGfjshLs2h"
     source:
       repository: ((github_user))/concourse-workshop
       access_token: ((github_token))
@@ -67,6 +67,7 @@ jobs:
     plan:
       - get: pull-request
         trigger: true
+        version: every
 
       - task: check-code-style
         file: pull-request/demo/tasks/pr-test.yml
