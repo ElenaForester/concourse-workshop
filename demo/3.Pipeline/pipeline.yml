@@ -31,7 +31,7 @@ jobs:
         trigger: true
 
       - task: check-code-style
-        file: ./demo/tasks/code-style.yml
+        file: concourse-workshop/demo/tasks/code-style.yml
 
   - name: Tests
     plan:
@@ -40,11 +40,11 @@ jobs:
         passed: ["Linting", "Code Style"]
 
       - task: get-depedencies
-        file: concourse-workshop/demo/3.Pipeline/tasks/deps.yml
+        file: concourse-workshop/demo/tasks/deps.yml
 
       - in_parallel:
         - task: unit-tests
-          file: concourse-workshop/demo/3.Pipeline/tasks/unit-tests.yml
+          file: concourse-workshop/demo/tasks/unit-tests.yml
 
         - task: integration-tests
-          file: concourse-workshop/demo/3.Pipeline/tasks/integration-tests.yml
+          file: concourse-workshop/demo/tasks/integration-tests.yml

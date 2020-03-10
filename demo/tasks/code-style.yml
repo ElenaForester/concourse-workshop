@@ -5,7 +5,7 @@ image_resource:
   source:
     repository: ubuntu
 run:
-  path: ./demo/scripts/code_style.sh
+  path: ./demo/scripts/code-style.sh
   dir: concourse-workshop
 inputs:
   - name: concourse-workshop
