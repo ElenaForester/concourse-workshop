@@ -1,15 +1,15 @@
 ---
 resources:
-  - name: flight-school
+  - name: concourse-workshop
     type: git
     source:
-      uri: https://((github_token))@github.com/((github_user))/flight-school.git
+      uri: https://((github_token))@github.com/((github_user))/concourse-workshop.git
       branch: ((github_branch))
 
 jobs:
   - name: Linting
     plan:
-      - get: flight-school
+      - get: concourse-workshop
         trigger: true
 
       - task: linting
@@ -18,121 +18,33 @@ jobs:
           image_resource:
             type: registry-image
             source:
-              repository: golang
+              repository: ubuntu
           run:
-            path: ./school/scripts/linting.sh
-            dir: flight-school
+            path: ./demo/scripts/linting.sh
+            dir: concourse-workshop
           inputs:
-            - name: flight-school
+            - name: concourse-workshop
 
   - name: Code Style
     plan:
-      - get: flight-school
+      - get: concourse-workshop
         trigger: true
 
       - task: check-code-style
-        config:
-          platform: linux
-          image_resource:
-            type: registry-image
-            source:
-              repository: golang
-          run:
-            path: ./school/scripts/code_style.sh
-            dir: flight-school
-          inputs:
-            - name: flight-school
+        file: ./demo/tasks/code-style.yml
 
   - name: Tests
     plan:
-      - get: flight-school
+      - get: concourse-workshop
         trigger: true
         passed: ["Linting", "Code Style"]
 
       - task: get-depedencies
-        config:
-          platform: linux
-          image_resource:
-            type: registry-image
-            source:
-              repository: golang
-          run:
-            path: ./school/scripts/make_deps.sh
-            dir: flight-school
-          inputs:
-            - name: flight-school
-          outputs:
-            - name: flight-school-with-deps
+        file: concourse-workshop/demo/3.Pipeline/tasks/deps.yml
 
       - in_parallel:
-          - task: unit-tests
-            config:
-              platform: linux
-              image_resource:
-                type: registry-image
-                source:
-                  repository: golang
-              run:
-                dir: flight-school-with-deps
-                path: make
-                args:
-                  - test-unit
-              inputs:
-                - name: flight-school-with-deps
+        - task: unit-tests
+          file: concourse-workshop/demo/3.Pipeline/tasks/unit-tests.yml
 
-          - do:
-              - task: start-docker-container
-                config:
-                  platform: linux
-                  image_resource:
-                    type: registry-image
-                    source:
-                      repository: 489198589229.dkr.ecr.eu-west-1.amazonaws.com/concourse-docker-compose
-                      tag: v1.2.0
-                  run:
-                    path: docker-up
-                    dir: flight-school
-                  inputs:
-                    - name: flight-school
-                  outputs:
-                    - name: docker
-                  params:
-                    DOCKER_HOST: ((docker_host))
-                    DOCKER_PORT: ((docker_port))
-                    DOCKER_COMPOSE: school/assets/docker-compose.yml
-
-              - task: integration-tests
-                config:
-                  platform: linux
-                  image_resource:
-                    type: registry-image
-                    source:
-                      repository: golang
-                  run:
-                    path: ./school/scripts/integration_tests.sh
-                    dir: flight-school-with-deps
-                  inputs:
-                    - name: flight-school-with-deps
-                    - name: docker
-                  params:
-                    DOCKER_HOST: ((docker_host))
-                    PROJECT_VARS: ((docker_variables))
-
-            ensure:
-              task: destroy-docker-container
-              config:
-                platform: linux
-                image_resource:
-                  type: registry-image
-                  source:
-                    repository: 489198589229.dkr.ecr.eu-west-1.amazonaws.com/concourse-docker-compose
-                    tag: v1.2.0
-                inputs:
-                  - name: flight-school
-                run:
-                  path: docker-down
-                  dir: flight-school
-                params:
-                  DOCKER_HOST: ((docker_host))
-                  DOCKER_PORT: ((docker_port))
-                  DOCKER_COMPOSE: school/assets/docker-compose.yml
+        - task: integration-tests
+          file: concourse-workshop/demo/3.Pipeline/tasks/integration-tests.yml
