@@ -1,0 +1,11 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: ubuntu
+run:
+  path: ./demo/scripts/integration-tests.sh
+  dir: concourse-workshop
+inputs:
+  - name: concourse-workshop
