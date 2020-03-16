@@ -25,7 +25,7 @@ jobs:
           inputs:
             - name: concourse-workshop
 
-  - name: Code Style
+  - name: Code Style 123
     plan:
       - get: concourse-workshop
         trigger: true
