@@ -15,7 +15,7 @@ resources:
   - name: pull-request
     type: pull-request
     check_every: 24h
-    webhook_token: vDGfjshLs2h
+    webhook_token: ((webhook_token))
     source:
       repository: ((github_user))/concourse-workshop
       access_token: ((github_token))
