@@ -7,7 +7,7 @@ resources:
       branch: ((github_branch))
 
 jobs:
-  - name: Linting
+  - name: linting
     plan:
       - get: concourse-workshop
         trigger: true
@@ -25,7 +25,7 @@ jobs:
           inputs:
             - name: concourse-workshop
 
-  - name: Code Style 123
+  - name: code-style
     plan:
       - get: concourse-workshop
         trigger: true
@@ -33,11 +33,11 @@ jobs:
       - task: check-code-style
         file: concourse-workshop/demo/tasks/code-style.yml
 
-  - name: Tests
+  - name: tests
     plan:
       - get: concourse-workshop
         trigger: true
-        passed: ["Linting", "Code Style"]
+        passed: ["linting", "code-style"]
 
       - task: get-depedencies
         file: concourse-workshop/demo/tasks/deps.yml
