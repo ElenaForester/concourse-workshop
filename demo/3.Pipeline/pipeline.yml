@@ -24,8 +24,6 @@ jobs:
             dir: concourse-workshop
           inputs:
             - name: concourse-workshop
-          params:
-            TEST_VAR: "I'm here!"
 
   - name: code-style
     plan:
